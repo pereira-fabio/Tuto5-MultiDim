@@ -10,6 +10,8 @@ function ScatterplotContainer({
   xAttribute,
   yAttribute,
   scatterplotControllerMethods,
+  selectedItems,
+  setSelectedItems,
 }) {
   // every time the component re-render
   useEffect(() => {
@@ -20,6 +22,7 @@ function ScatterplotContainer({
 
   const divContainerRef = useRef(null);
   const scatterplotD3Ref = useRef(null);
+  const scatterplotDataRef = useRef(scatterplotData);
 
   const getCharSize = function () {
     // getting size from parent item
@@ -56,10 +59,11 @@ function ScatterplotContainer({
       "ScatterplotContainer useEffect with dependency [scatterplotData, xAttribute, yAttribute, scatterplotControllerMethods], called each time scatterplotData changes..."
     );
 
-    const handleOnClick = function (itemData) {
-      // Call the parent controller method to update selected items
-      scatterplotControllerMethods.handleOnClick(itemData);
+    const handleOnClick = function (cellData) {
+      console.log("handleOnClick ...");
+      scatterplotControllerMethods.updateSelectedItems([cellData]);
     };
+
     const handleOnMouseEnter = function (itemData) {
       // Optional: Add hover effects if needed
       scatterplotControllerMethods.handleOnMouseEnter(itemData);
@@ -69,6 +73,7 @@ function ScatterplotContainer({
       // Optional: Remove hover effects if needed
       scatterplotControllerMethods.handleOnMouseLeave();
     };
+
     const controllerMethods = {
       handleOnClick,
       handleOnMouseEnter,
@@ -85,6 +90,22 @@ function ScatterplotContainer({
       controllerMethods
     );
 
+    if (scatterplotDataRef.current != scatterplotData) {
+      console.log(
+        "ScatterplotContainer useEffect when scatterplotData changes..."
+      );
+      // get the current instance of scatterplotD3 from the Ref object...
+      const scatterplotD3 = scatterplotD3Ref.current;
+      // call renderScatterplot of ScatterplotD3...;
+      scatterplotD3.renderScatterplot(
+        scatterplotData,
+        xAttribute,
+        yAttribute,
+        controllerMethods
+      );
+      scatterplotDataRef.current = scatterplotData;
+    }
+
     if (
       scatterplotD3.highlightSelectedItems &&
       scatterplotControllerMethods.getSelectedItems
@@ -93,6 +114,21 @@ function ScatterplotContainer({
       scatterplotD3.highlightSelectedItems(selectedItems);
     }
   }, [scatterplotData, scatterplotControllerMethods]); // if dependencies, useEffect is called after each data update, in our case only matrixData changes.
+
+  useEffect(() => {
+    console.log(
+      "ScatterplotContainer useEffect with dependency [selectedItems], " +
+        "called each time selectedItems changes..."
+    );
+    // get the current instance of scatterplotD3 from the Ref object...
+    // call highlightSelectedItems of ScatterplotD3...;
+    const scatterplotD3 = scatterplotD3Ref.current;
+
+    // call highlightSelectedItems of ScatterplotD3...;
+    if (scatterplotD3 && scatterplotD3.highlightSelectedItems) {
+      scatterplotD3.highlightSelectedItems(selectedItems);
+    }
+  }, [selectedItems]);
 
   return (
     <div ref={divContainerRef} className="scatterplotDivContainer col2">

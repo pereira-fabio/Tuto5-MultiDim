@@ -37,12 +37,16 @@ function App() {
           xAttribute="area"
           yAttribute="price"
           scatterplotControllerMethods={scatterplotControllerMethods}
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
         />
         <ScatterplotContainer
           scatterplotData={data}
           xAttribute="bedrooms"
           yAttribute="price"
           scatterplotControllerMethods={scatterplotControllerMethods}
+          selectedItems={selectedItems}
+          setSelectedItems={setSelectedItems}
         />
       </div>
     </div>

@@ -70,9 +70,38 @@ class ScatterplotD3 {
   }
 
   highlightSelectedItems(selectedItems) {
-    // use pattern update to change the border and opacity of objects:
-    //      - call this.changeBorderAndOpacity(selection,true) for objects in selectedItems
-    //      - this.changeBorderAndOpacity(selection,false) for objects not in selectedItems
+    // Select all markers (adjust selector based on your actual marker class/element)
+    const allMarkers = d3.select(this.svg).selectAll(".marker"); // or '.data-point', 'circle', etc.
+
+    // Filter markers that ARE in selectedItems - make them red
+    const selectedMarkers = allMarkers.filter(
+      (d) => selectedItems.includes(d.id) // or d.name, d.key - depending on your data structure
+    );
+    this.changeBorderAndOpacity(selectedMarkers, true);
+
+    // Filter markers that are NOT in selectedItems - reset to default
+    const unselectedMarkers = allMarkers.filter(
+      (d) => !selectedItems.includes(d.id)
+    );
+    this.changeBorderAndOpacity(unselectedMarkers, false);
+  }
+
+  changeBorderAndOpacity(selection, isSelected) {
+    if (isSelected) {
+      // Selected items: red with prominent border
+      selection
+        .attr("fill", "red")
+        .attr("stroke", "darkred")
+        .attr("stroke-width", 2)
+        .attr("opacity", 1);
+    } else {
+      // Unselected items: default color with subtle styling
+      selection
+        .attr("fill", "steelblue") // or your default color
+        .attr("stroke", "#999")
+        .attr("stroke-width", 1)
+        .attr("opacity", 0.6);
+    }
   }
 
   updateAxis = function (visData, xAttribute, yAttribute) {
