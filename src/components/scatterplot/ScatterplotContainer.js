@@ -1,74 +1,104 @@
-import './Scatterplot.css'
-import { useEffect, useRef } from 'react';
+import "./Scatterplot.css";
+import { useEffect, useRef } from "react";
 
-import ScatterplotD3 from './Scatterplot-d3';
+import ScatterplotD3 from "./Scatterplot-d3";
 
 // TODO: import action methods from reducers
 
-function ScatterplotContainer({scatterplotData, xAttribute, yAttribute, scatterplotControllerMethods}){
+function ScatterplotContainer({
+  scatterplotData,
+  xAttribute,
+  yAttribute,
+  scatterplotControllerMethods,
+}) {
+  // every time the component re-render
+  useEffect(() => {
+    console.log(
+      "ScatterplotContainer useEffect (called each time scatterplot re-renders)"
+    );
+  }); // if no dependencies, useEffect is called at each re-render
 
-    // every time the component re-render
-    useEffect(()=>{
-        console.log("ScatterplotContainer useEffect (called each time scatterplot re-renders)");
-    }); // if no dependencies, useEffect is called at each re-render
+  const divContainerRef = useRef(null);
+  const scatterplotD3Ref = useRef(null);
 
-    const divContainerRef=useRef(null);
-    const scatterplotD3Ref = useRef(null);
-
-    const getCharSize = function(){
-        // getting size from parent item
-        let width;// = 800;
-        let height;// = 100;
-        if(divContainerRef.current!==undefined){
-            width=divContainerRef.current.offsetWidth;
-            height=divContainerRef.current.offsetHeight-4;
-        }
-        return {width:width,height:height};
+  const getCharSize = function () {
+    // getting size from parent item
+    let width; // = 800;
+    let height; // = 100;
+    if (divContainerRef.current !== undefined) {
+      width = divContainerRef.current.offsetWidth;
+      height = divContainerRef.current.offsetHeight - 4;
     }
+    return { width: width, height: height };
+  };
 
-    // did mount called once the component did mount
-    useEffect(()=>{
-        console.log("ScatterplotContainer useEffect [] called once the component did mount");
-        const scatterplotD3 = new ScatterplotD3(divContainerRef.current);
-        scatterplotD3.create({size:getCharSize()});
-        scatterplotD3Ref.current = scatterplotD3;
-        return ()=>{
-            // did unmout, the return function is called once the component did unmount (removed for the screen)
-            console.log("ScatterplotContainer useEffect [] return function, called when the component did unmount...");
-            const scatterplotD3 = scatterplotD3Ref.current;
-            scatterplotD3.clear()
-        }
-    },[]);// if empty array, useEffect is called after the component did mount (has been created)
+  // did mount called once the component did mount
+  useEffect(() => {
+    console.log(
+      "ScatterplotContainer useEffect [] called once the component did mount"
+    );
+    const scatterplotD3 = new ScatterplotD3(divContainerRef.current);
+    scatterplotD3.create({ size: getCharSize() });
+    scatterplotD3Ref.current = scatterplotD3;
+    return () => {
+      // did unmout, the return function is called once the component did unmount (removed for the screen)
+      console.log(
+        "ScatterplotContainer useEffect [] return function, called when the component did unmount..."
+      );
+      const scatterplotD3 = scatterplotD3Ref.current;
+      scatterplotD3.clear();
+    };
+  }, []); // if empty array, useEffect is called after the component did mount (has been created)
 
-    // did update, called each time dependencies change, dispatch remain stable over component cycles
-    useEffect(()=>{
-        console.log("ScatterplotContainer useEffect with dependency [scatterplotData, xAttribute, yAttribute, scatterplotControllerMethods], called each time scatterplotData changes...");
+  // did update, called each time dependencies change, dispatch remain stable over component cycles
+  useEffect(() => {
+    console.log(
+      "ScatterplotContainer useEffect with dependency [scatterplotData, xAttribute, yAttribute, scatterplotControllerMethods], called each time scatterplotData changes..."
+    );
 
-        const handleOnClick = function(itemData){
-        }
-        const handleOnMouseEnter = function(itemData){
-        }
-        const handleOnMouseLeave = function(){
-        }
+    const handleOnClick = function (itemData) {
+      // Call the parent controller method to update selected items
+      scatterplotControllerMethods.handleOnClick(itemData);
+    };
+    const handleOnMouseEnter = function (itemData) {
+      // Optional: Add hover effects if needed
+      scatterplotControllerMethods.handleOnMouseEnter(itemData);
+    };
 
-        const controllerMethods={
-            handleOnClick,
-            handleOnMouseEnter,
-            handleOnMouseLeave
-        }
+    const handleOnMouseLeave = function () {
+      // Optional: Remove hover effects if needed
+      scatterplotControllerMethods.handleOnMouseLeave();
+    };
+    const controllerMethods = {
+      handleOnClick,
+      handleOnMouseEnter,
+      handleOnMouseLeave,
+    };
 
-        // get the current instance of scatterplotD3 from the Ref...
-        // call renderScatterplot of ScatterplotD3...;
+    // get the current instance of scatterplotD3 from the Ref...
+    // call renderScatterplot of ScatterplotD3...;
+    const scatterplotD3 = scatterplotD3Ref.current;
+    scatterplotD3.renderScatterplot(
+      scatterplotData,
+      xAttribute,
+      yAttribute,
+      controllerMethods
+    );
 
-    },[scatterplotData, scatterplotControllerMethods]);// if dependencies, useEffect is called after each data update, in our case only matrixData changes.
+    if (
+      scatterplotD3.highlightSelectedItems &&
+      scatterplotControllerMethods.getSelectedItems
+    ) {
+      const selectedItems = scatterplotControllerMethods.getSelectedItems();
+      scatterplotD3.highlightSelectedItems(selectedItems);
+    }
+  }, [scatterplotData, scatterplotControllerMethods]); // if dependencies, useEffect is called after each data update, in our case only matrixData changes.
 
-    return(
-        <div ref={divContainerRef} className="scatterplotDivContainer col2">
-            <div id="" className="row">
-
-            </div>
-        </div>
-    )
+  return (
+    <div ref={divContainerRef} className="scatterplotDivContainer col2">
+      <div id="" className="row"></div>
+    </div>
+  );
 }
 
 export default ScatterplotContainer;
